@@ -1,6 +1,7 @@
 Concepts for D
---------------
+===============
 
+[![Build Status](https://travis-ci.org/atilaneves/concepts.png?branch=master)](https://travis-ci.org/atilaneves/concepts)
 
 Right now there's only `models`, which can be used as a UDA or in a static assert:
 
