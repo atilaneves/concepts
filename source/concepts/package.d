@@ -31,7 +31,9 @@ template models(T, alias P, A...)
     {
         bool models()
         {
-            import std.algorithm.searching.countUntil;
+            import std.algorithm: countUntil;
+            import std.traits: moduleName;
+
             enum openParenIndex = P.stringof.countUntil("(");
             enum untilOpenParen = P.stringof["is".length .. openParenIndex];
             enum checkName = "check" ~ untilOpenParen;
@@ -47,18 +49,9 @@ template models(T, alias P, A...)
 ///
 unittest
 {
-    void checkFoo(T)()
-    {
-        T t = T.init;
-        t.foo();
-    }
 
     enum isFoo(T) = is(typeof(checkFoo!T));
 
-    void checkBar(T, U)()
-    {
-        U _bar = T.init.bar;
-    }
 
     template isBar(T, U)
     {
@@ -85,6 +78,20 @@ unittest
     static assert(!__traits(compiles, models!(Bar, isFoo)));
     static assert(!__traits(compiles, models!(Foo, isBar, byte)));
 }
+
+version(unittest) {
+    void checkFoo(T)()
+    {
+        T t = T.init;
+        t.foo();
+    }
+
+    void checkBar(T, U)()
+    {
+        U _bar = T.init.bar;
+    }
+}
+
 
 unittest
 {
