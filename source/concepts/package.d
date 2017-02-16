@@ -15,7 +15,7 @@ module concepts;
  * with the "is" replaced by "check" should exist (e.g. `checkInputRange`)
  * and be defined in the same module.
  */
-template models(T, alias P, A...)
+template models(alias T, alias P, A...)
 {
     static assert(P.stringof[0..2] == "is",
                   P.stringof ~ " does not begin with 'is', which is require by `models`");
@@ -79,6 +79,23 @@ unittest
     static assert(!__traits(compiles, models!(Foo, isBar, byte)));
 }
 
+
+@safe pure unittest
+{
+    struct Foo {}
+    enum weirdPred(T) = true;
+    //always true, this is a sanity check
+    static assert(weirdPred!Foo);
+    //shouldn't compile since weirdPred doesn't begin with the word "is"
+    static assert(!__traits(compiles, models!(Foo, weirdPred)));
+}
+
+
+@safe pure unittest {
+    static assert(__traits(compiles, models!(serialise, isSerialisationFunction)));
+    static assert(!__traits(compiles, models!(doesNotSerialise, isSerialisationFunction)));
+}
+
 version(unittest) {
     void checkFoo(T)()
     {
@@ -90,15 +107,19 @@ version(unittest) {
     {
         U _bar = T.init.bar;
     }
-}
 
+    void checkSerialisationFunction(alias F)() {
+        ubyte[] bytes = F(5);
+    }
 
-unittest
-{
-    struct Foo {}
-    enum weirdPred(T) = true;
-    //always true, this is a sanity check
-    static assert(weirdPred!Foo);
-    //shouldn't compile since weirdPred doesn't begin with the word "is"
-    static assert(!__traits(compiles, models!(Foo, weirdPred)));
+    enum isSerialisationFunction(alias F) = is(typeof(checkSerialisationFunction!F));
+
+    @models!(serialise, isSerialisationFunction)
+    ubyte[] serialise(T)(in T val) {
+        return [42];
+    }
+
+    void doesNotSerialise(T)(in T val) {
+
+    }
 }
