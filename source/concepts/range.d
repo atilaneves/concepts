@@ -101,9 +101,6 @@ enum isOutputRange(R, E) = is(typeof(checkOutputRange!(R, E)));
 ///
 @safe pure unittest
 {
-    import concepts.models: models;
-
-    //@models!(myprint, isOutputRange)
     void myprint(in char[] s) { }
     static assert(isOutputRange!(typeof(&myprint), char));
 
@@ -134,6 +131,9 @@ enum isOutputRange(R, E) = is(typeof(checkOutputRange!(R, E)));
 
 
 void checkForwardRange(R)(inout int = 0) {
+
+    checkInputRange!R;
+
     R r1 = R.init;
     // NOTE: we cannot check typeof(r1.save) directly
     // because typeof may not check the right type there, and
@@ -171,7 +171,7 @@ are the same as for an input range, with the additional requirement
 that backtracking must be possible by saving a copy of the range
 object with $(D save) and using it later.
  */
-enum isForwardRange(R) = isInputRange!R && is(typeof(checkForwardRange!R));
+enum isForwardRange(R) = is(typeof(checkForwardRange!R));
 
 ///
 @safe pure unittest
@@ -187,7 +187,6 @@ enum isForwardRange(R) = isInputRange!R && is(typeof(checkForwardRange!R));
     import concepts.models: models;
 
     @models!(R14544, isForwardRange)
-    @models!(R14544, isInputRange)
     struct R14544
     {
         int front() { return 0;}
@@ -203,9 +202,9 @@ enum isForwardRange(R) = isInputRange!R && is(typeof(checkForwardRange!R));
 void checkBidirectionalRange(R)(inout int = 0) {
     R r = R.init;
     r.popBack;
-        auto t = r.back;
-        auto w = r.front;
-        static assert(is(typeof(t) == typeof(w)));
+    auto t = r.back;
+    auto w = r.front;
+    static assert(is(typeof(t) == typeof(w)));
 }
 
 /**
@@ -266,6 +265,9 @@ void checkRandomAccessRange(R)(inout int = 0) {
 
     import std.traits: isNarrowString;
     import std.range: hasLength, isInfinite;
+
+    if(isBidirectionalRange!R) checkBidirectionalRange!R;
+    if(isForwardRange!R) checkForwardRange!R;
 
     static assert(isBidirectionalRange!R ||
                   isForwardRange!R && isInfinite!R);
