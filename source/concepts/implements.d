@@ -10,12 +10,20 @@ version(unittest) {
         int foo(int i, string s) @safe;
     }
 
+    interface IBar {
+        string bar(double d) @safe;
+    }
+
     struct Foo {
         int foo(int i, string s) @safe;
     }
 
     struct Bar {
+        string bar(double d) @safe;
+    }
 
+    struct UnsafeBar {
+        string bar(double d) @system;
     }
 }
 
@@ -80,4 +88,7 @@ template implements(alias T, alias Interface, A...) {
 @safe unittest {
     static assert(implements!(Foo, IFoo));
     static assert(!implements!(Bar, IFoo));
+    static assert(!implements!(Foo, IBar));
+    static assert(implements!(Bar, IBar));
+    static assert(!implements!(UnsafeBar, IBar));
 }
