@@ -4,34 +4,22 @@ alias Identity(alias T) = T;
 private enum isPrivate(T, string member) = !__traits(compiles, __traits(getMember, T, member));
 
 
-version(unittest) {
-
-    interface IFoo {
-        int foo(int i, string s) @safe;
-    }
-
-    interface IBar {
-        string bar(double d) @safe;
-    }
-
-    struct Foo {
-        int foo(int i, string s) @safe;
-    }
-
-    struct Bar {
-        string bar(double d) @safe;
-    }
-
-    struct UnsafeBar {
-        string bar(double d) @system;
-    }
-}
-
 template implements(alias T, alias Interface, A...) {
 
-    bool implements() @safe {
+    static if(__traits(compiles, mixin(implInterfaceStr))) {
+        bool implements() {
+            return true;
+        }
+    } else {
+        bool implements() {
+            // force compilation error
+            mixin(`auto _ = ` ~ implInterfaceStr ~ `;`);
+            return false;
+        }
+    }
 
-        auto ret = true;
+    private string implInterfaceStr() {
+        string implString = "new class Interface {\n";
         foreach(memberName; __traits(allMembers, Interface)) {
 
             static if(!isPrivate!(Interface, memberName)) {
@@ -39,19 +27,20 @@ template implements(alias T, alias Interface, A...) {
                 alias member = Identity!(__traits(getMember, Interface, memberName));
 
                 static if(__traits(isAbstractFunction, member)) {
-                    // foreach(i, overload; __traits(getOverloads, Interface, memberName)) {
-                    //     pragma(msg, memberName);
-                    // }
-                    if(!__traits(compiles, createClass!member))
-                        ret = ret && false;
+                    implString ~= implMethodStr!member ~ "\n";
                 }
             }
 
         }
-        return ret;
+
+        implString ~= "}";
+
+        return implString;
     }
 
-    private Interface createClass(alias method)() {
+
+    // returns a string to mixin that implements the method
+    private string implMethodStr(alias method)() {
         import std.traits: ReturnType, Parameters;
 
         // e.g. int arg0, string arg1
@@ -74,21 +63,55 @@ template implements(alias T, alias Interface, A...) {
             return Parameters!method.length.iota.map!(i => text(`arg`, i)).array.join(`, `);
         }
 
-        return new class Interface {
-            enum methodName = __traits(identifier, method);
-            mixin(q{ override ReturnType!method } ~  methodName ~
+        enum methodName = __traits(identifier, method);
+        alias R = ReturnType!method;
+        return `override ` ~ R.stringof ~ " " ~ methodName ~
                   `(` ~ typeArgs ~ `) {` ~
                   ` return ` ~ T.stringof ~ `.init.` ~ methodName ~ `(` ~ callArgs() ~ `);` ~
-                  `}`);
-        };
+                  `}`;
     }
+
 }
 
 @("Foo implements IFoo")
 @safe unittest {
-    static assert(implements!(Foo, IFoo));
-    static assert(!implements!(Bar, IFoo));
-    static assert(!implements!(Foo, IBar));
-    static assert(implements!(Bar, IBar));
-    static assert(!implements!(UnsafeBar, IBar));
+    static assert(__traits(compiles, implements!(Foo, IFoo)));
+    static assert(!__traits(compiles, implements!(Bar, IFoo)));
+    static assert(!__traits(compiles, implements!(Foo, IBar)));
+    static assert(__traits(compiles, implements!(Bar, IBar)));
+    static assert(!__traits(compiles, implements!(UnsafeBar, IBar)));
+
+    static assert(__traits(compiles, useFoo(Foo())));
+    static assert(!__traits(compiles, useBar(Foo())));
+    static assert(!__traits(compiles, useFoo(Bar())));
+    static assert(__traits(compiles, useBar(Bar())));
+
+}
+
+version(unittest) {
+
+    interface IFoo {
+        int foo(int i, string s) @safe;
+        double lefoo(string s) @safe;
+    }
+
+    interface IBar {
+        string bar(double d) @safe;
+    }
+
+    struct Foo {
+        int foo(int i, string s) @safe;
+        double lefoo(string s) @safe;
+    }
+
+    struct Bar {
+        string bar(double d) @safe;
+    }
+
+    struct UnsafeBar {
+        string bar(double d) @system;
+    }
+
+    void useFoo(T)(T) if(implements!(T, IFoo)) {}
+    void useBar(T)(T) if(implements!(T, IBar)) {}
 }
