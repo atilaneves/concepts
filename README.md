@@ -70,3 +70,25 @@ source/concepts/range.d(13,10): Error: template std.range.primitives.empty canno
 source/concepts/models.d-mixin-42(42,1): Error: template instance concepts.range.checkInputRange!(B) error instantiating
 source/concepts/range.d(72,6):        instantiated from here: models!(B, isInputRange)
 ```
+
+Using a D `interface` to specify compile-time template constraints
+------------------------------------------------------------------
+
+```d
+interface IFoo {
+    int foo(int i, string s) @safe;
+    double lefoo(string s) @safe;
+}
+
+@implements!(Foo, IFoo)
+struct Foo {
+    int foo(int i, string s) @safe { return 0; }
+    double lefoo(string s) @safe { return 0; }
+}
+
+// doesn't compile
+/*
+@implements!(Oops, IFoo)
+struct Oops {}
+*/
+````
