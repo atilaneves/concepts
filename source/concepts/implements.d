@@ -4,18 +4,22 @@ alias Identity(alias T) = T;
 private enum isPrivate(T, string member) = !__traits(compiles, __traits(getMember, T, member));
 
 
-template implements(alias T, alias Interface, A...) {
+template implements(alias T, alias Interface) {
 
-    static if(__traits(compiles, mixin(implInterfaceStr))) {
+    static if(__traits(compiles, check())) {
         bool implements() {
             return true;
         }
     } else {
         bool implements() {
             // force compilation error
-            mixin(`auto _ = ` ~ implInterfaceStr ~ `;`);
+            check();
             return false;
         }
+    }
+
+    private void check() @safe pure {
+        mixin(`auto _ = ` ~ implInterfaceStr ~ `;`);
     }
 
     private string implInterfaceStr() {
@@ -27,7 +31,9 @@ template implements(alias T, alias Interface, A...) {
                 alias member = Identity!(__traits(getMember, Interface, memberName));
 
                 static if(__traits(isAbstractFunction, member)) {
-                    implString ~= implMethodStr!member ~ "\n";
+                    foreach(i, overload; __traits(getOverloads, Interface, memberName)) {
+                        implString ~= implMethodStr!overload ~ "\n";
+                    }
                 }
             }
 
@@ -73,6 +79,7 @@ template implements(alias T, alias Interface, A...) {
 
 }
 
+
 @("Foo implements IFoo")
 @safe unittest {
     static assert(__traits(compiles, implements!(Foo, IFoo)));
@@ -85,7 +92,6 @@ template implements(alias T, alias Interface, A...) {
     static assert(!__traits(compiles, useBar(Foo())));
     static assert(!__traits(compiles, useFoo(Bar())));
     static assert(__traits(compiles, useBar(Bar())));
-
 }
 
 version(unittest) {
@@ -97,19 +103,22 @@ version(unittest) {
 
     interface IBar {
         string bar(double d) @safe;
+        void bar(string s) @safe;
     }
 
     struct Foo {
-        int foo(int i, string s) @safe;
-        double lefoo(string s) @safe;
+        int foo(int i, string s) @safe { return 0; }
+        double lefoo(string s) @safe { return 0; }
     }
 
     struct Bar {
-        string bar(double d) @safe;
+        string bar(double d) @safe { return ""; }
+        void bar(string s) @safe { }
     }
 
     struct UnsafeBar {
-        string bar(double d) @system;
+        string bar(double d) @system { return ""; }
+        void bar(string s) @system { }
     }
 
     void useFoo(T)(T) if(implements!(T, IFoo)) {}
