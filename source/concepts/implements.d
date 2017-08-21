@@ -105,6 +105,12 @@ template implements(alias T, alias Interface) {
     static assert(__traits(compiles, useFooandBar(FooBar())));
 }
 
+@("FooClass implements IFoo")
+@safe unittest {
+    static assert(__traits(compiles, implements!(FooClass, IFoo)));
+    static assert(__traits(compiles, useFoo(FooClass.init)));
+}
+
 version(unittest) {
 
     interface IFoo {
@@ -138,7 +144,12 @@ version(unittest) {
         string bar(double d) @safe { return ""; }
         void bar(string s) @safe { }
     }
-
+    
+    class FooClass {
+        int foo(int i, string s) @safe { return 0; }
+        double lefoo(string s) @safe { return 0; }
+    }
+    
     void useFoo(T)(T) if(implements!(T, IFoo)) {}
     void useBar(T)(T) if(implements!(T, IBar)) {}
     void useFooandBar(T)(T) if(implements!(T, IFoo) && implements!(T, IBar)) {}
