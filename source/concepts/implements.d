@@ -95,7 +95,7 @@ template implements(alias T, alias Interface) {
 }
 
 @("FooBar implements IFoo and IBar")
-unittest {
+@safe unittest {
     static assert(__traits(compiles, implements!(FooBar, IFoo)));
     static assert(__traits(compiles, implements!(FooBar, IBar)));
     
