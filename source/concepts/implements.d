@@ -94,6 +94,28 @@ template implements(alias T, alias Interface) {
     static assert(__traits(compiles, useBar(Bar())));
 }
 
+@("FooBar implements IFoo and IBar")
+@safe unittest {
+    static assert(__traits(compiles, implements!(FooBar, IFoo)));
+    static assert(__traits(compiles, implements!(FooBar, IBar)));
+    
+    static assert(__traits(compiles, useFoo(FooBar())));
+    static assert(__traits(compiles, useBar(FooBar())));
+    
+    static assert(__traits(compiles, useFooandBar(FooBar())));
+}
+
+@("FooClass implements IFoo")
+@safe unittest {
+    static assert(__traits(compiles, implements!(FooClass, IFoo)));
+    static assert(__traits(compiles, useFoo(FooClass.init)));
+}
+
+@("Foo implements FooAbstractClass")
+@safe unittest {
+    static assert(__traits(compiles, implements!(Foo, FooAbstractClass)));
+}
+
 version(unittest) {
 
     interface IFoo {
@@ -120,7 +142,25 @@ version(unittest) {
         string bar(double d) @system { return ""; }
         void bar(string s) @system { }
     }
-
+    
+    struct FooBar {
+        int foo(int i, string s) @safe { return 0; }
+        double lefoo(string s) @safe { return 0; }
+        string bar(double d) @safe { return ""; }
+        void bar(string s) @safe { }
+    }
+    
+    class FooClass {
+        int foo(int i, string s) @safe { return 0; }
+        double lefoo(string s) @safe { return 0; }
+    }
+    
+    class FooAbstractClass {
+        abstract int foo(int i, string s) @safe;
+        final double lefoo(string s) @safe { return 0; }
+    }
+    
     void useFoo(T)(T) if(implements!(T, IFoo)) {}
     void useBar(T)(T) if(implements!(T, IBar)) {}
+    void useFooandBar(T)(T) if(implements!(T, IFoo) && implements!(T, IBar)) {}
 }
