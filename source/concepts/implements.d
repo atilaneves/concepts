@@ -1,10 +1,13 @@
 module concepts.implements;
 
+import std.traits : isAbstractClass, isAggregateType;
+
 alias Identity(alias T) = T;
 private enum isPrivate(T, string member) = !__traits(compiles, __traits(getMember, T, member));
 
 
-template implements(alias T, alias Interface) {
+template implements(alias T, alias Interface)
+    if (isAggregateType!T && isAbstractClass!Interface) {
 
     static if(__traits(compiles, check())) {
         bool implements() {
