@@ -1,0 +1,6 @@
+name "example"
+description "Example project using concepts"
+authors "Atila Neves"
+copyright "Copyright © 2017, Atila Neves"
+license "BSD"
+dependency "concepts" path=".."

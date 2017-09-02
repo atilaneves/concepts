@@ -76,7 +76,7 @@ template implements(alias T, alias Interface)
         alias R = ReturnType!method;
         return `override ` ~ R.stringof ~ " " ~ methodName ~
                   `(` ~ typeArgs ~ `) {` ~
-                  ` return ` ~ T.stringof ~ `.init.` ~ methodName ~ `(` ~ callArgs() ~ `);` ~
+                  ` return T` ~ `.init.` ~ methodName ~ `(` ~ callArgs() ~ `);` ~
                   `}`;
     }
 
@@ -101,10 +101,10 @@ template implements(alias T, alias Interface)
 @safe unittest {
     static assert(__traits(compiles, implements!(FooBar, IFoo)));
     static assert(__traits(compiles, implements!(FooBar, IBar)));
-    
+
     static assert(__traits(compiles, useFoo(FooBar())));
     static assert(__traits(compiles, useBar(FooBar())));
-    
+
     static assert(__traits(compiles, useFooandBar(FooBar())));
 }
 
@@ -145,24 +145,24 @@ version(unittest) {
         string bar(double d) @system { return ""; }
         void bar(string s) @system { }
     }
-    
+
     struct FooBar {
         int foo(int i, string s) @safe { return 0; }
         double lefoo(string s) @safe { return 0; }
         string bar(double d) @safe { return ""; }
         void bar(string s) @safe { }
     }
-    
+
     class FooClass {
         int foo(int i, string s) @safe { return 0; }
         double lefoo(string s) @safe { return 0; }
     }
-    
+
     class FooAbstractClass {
         abstract int foo(int i, string s) @safe;
         final double lefoo(string s) @safe { return 0; }
     }
-    
+
     void useFoo(T)(T) if(implements!(T, IFoo)) {}
     void useBar(T)(T) if(implements!(T, IBar)) {}
     void useFooandBar(T)(T) if(implements!(T, IFoo) && implements!(T, IBar)) {}
