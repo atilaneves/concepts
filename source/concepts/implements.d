@@ -34,7 +34,7 @@ template implements(alias T, alias Interface)
                 alias member = Identity!(__traits(getMember, Interface, memberName));
 
                 static if(__traits(isAbstractFunction, member)) {
-                    foreach(i, overload; __traits(getOverloads, Interface, memberName)) {
+                    foreach(overload; __traits(getOverloads, Interface, memberName)) {
                         implString ~= implMethodStr!overload ~ "\n";
                     }
                 }
