@@ -92,3 +92,39 @@ struct Foo {
 struct Oops {}
 */
 ````
+
+Other examples
+--------------
+
+Contraining a struct to not have member functions (credit to @jmh530):
+
+```d
+void checkOnlyData(T)()
+    if (is(T == struct))
+{
+    import std.traits : isFunction;
+
+    static foreach (mem; __traits(allMembers, T))
+    {
+        static if (mem != "this")
+        {
+            static assert(!(isFunction!(__traits(getMember, T.init, mem))),
+                          T.stringof ~ " is constrained to not have any member functions, but it has (at least) the member function: " ~ mem);
+        }
+    }
+}
+
+template isOnlyData(T)
+    if (is(T == struct))
+{
+    enum isOnlyData = is(typeof(checkOnlyData!(T)));
+}
+
+@models!(Foo, isOnlyData)
+struct Foo
+{
+    int a;
+}
+
+Foo foo;
+```
