@@ -22,7 +22,9 @@ template implements(alias T, alias Interface)
     }
 
     private void check() @safe pure {
-        mixin(`auto _ = ` ~ implInterfaceStr ~ `;`);
+        enum mixinStr = `auto _ = ` ~ implInterfaceStr ~ `;`;
+        //pragma(msg, mixinStr);
+        mixin(mixinStr);
     }
 
     private string implInterfaceStr() {
@@ -35,7 +37,9 @@ template implements(alias T, alias Interface)
 
                 static if(__traits(isAbstractFunction, member)) {
                     foreach(overload; __traits(getOverloads, Interface, memberName)) {
-                        implString ~= implMethodStr!overload ~ "\n";
+                        foreach(line; implMethodStr!overload) {
+                            implString ~= `    ` ~ line ~ "\n";
+                        }
                     }
                 }
             }
@@ -47,15 +51,21 @@ template implements(alias T, alias Interface)
         return implString;
     }
 
-
     // returns a string to mixin that implements the method
-    private string implMethodStr(alias method)() {
-        import std.traits: ReturnType, Parameters;
+    private string[] implMethodStr(alias method)() {
+
+        import std.traits: ReturnType, Parameters, moduleName;
+        import std.meta: staticMap;
+        import std.algorithm: map;
+        import std.range: iota;
+        import std.array: join, array;
+        import std.conv: text;
+
+
+        if(!__ctfe) return [];
 
         // e.g. int arg0, string arg1
         string typeArgs() {
-            import std.array: array, join;
-            import std.conv: text;
             string[] args;
             foreach(i, _; Parameters!method) {
                 args ~= text(Parameters!method[i].stringof, ` arg`, i);
@@ -65,19 +75,33 @@ template implements(alias T, alias Interface)
 
         // e.g. arg0, arg1
         string callArgs() {
-            import std.range: iota;
-            import std.algorithm: map;
-            import std.array: array, join;
-            import std.conv: text;
             return Parameters!method.length.iota.map!(i => text(`arg`, i)).array.join(`, `);
         }
 
+        string[] importMixin(T)() {
+            static if(__traits(compiles, moduleName!T)) {
+                return [`import ` ~ moduleName!T ~ `: ` ~ T.stringof ~ `;`];
+            } else
+                return [];
+        }
+
+        string[] ret;
+
+        ret ~= importMixin!(ReturnType!method);
+
+        foreach(P; Parameters!method) {
+            ret ~= importMixin!P;
+        }
+
         enum methodName = __traits(identifier, method);
-        alias R = ReturnType!method;
-        return `override ` ~ R.stringof ~ " " ~ methodName ~
-                  `(` ~ typeArgs ~ `) {` ~
-                  ` return T` ~ `.init.` ~ methodName ~ `(` ~ callArgs() ~ `);` ~
-                  `}`;
+
+        ret ~=
+            `override ` ~ ReturnType!method.stringof ~ " " ~ methodName ~
+            `(` ~ typeArgs ~ `) {` ~
+            ` return T` ~ `.init.` ~ methodName ~ `(` ~ callArgs() ~ `);` ~
+            ` }`;
+
+        return ret;
     }
 
 }

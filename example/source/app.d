@@ -1,6 +1,14 @@
 import std.stdio : writeln;
 import concepts : implements;
 
+void main() {
+    Foo x;
+
+    x.useFoo;
+
+    writeln("done");
+}
+
 interface IFoo {
     int foo(int i, string s) @safe;
     double lefoo(string s) @safe;
@@ -15,13 +23,4 @@ void useFoo(T)(T x)
     if(implements!(T, IFoo))
 {
     writeln("Foo");
-}
-
-void main()
-{
-    Foo x;
-
-    x.useFoo;
-
-    writeln("done");
 }
