@@ -2,8 +2,7 @@ language: d
 sudo: false
 
 script:
-  - dub test
-  - cd example && dub build
+  - ci.sh
 
 matrix:
     include:
