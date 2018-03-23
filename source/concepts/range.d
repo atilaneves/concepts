@@ -5,7 +5,7 @@
  */
 module concepts.range;
 
-import std.array: front, popFront, empty, put, save, back, popBack;
+import std.range.primitives: front, popFront, empty, put, save, back, popBack;
 
 
 void checkInputRange(R)(inout int = 0) {
