@@ -119,51 +119,50 @@ template implements(alias T, alias Interface)
     static assert(__traits(compiles, implements!(Foo, FooAbstractClass)));
 }
 
-version(unittest) {
+version(unittest):
 
-    interface IFoo {
-        int foo(int i, string s) @safe;
-        double lefoo(string s) @safe;
-    }
-
-    interface IBar {
-        string bar(double d) @safe;
-        void bar(string s) @safe;
-    }
-
-    struct Foo {
-        int foo(int i, string s) @safe { return 0; }
-        double lefoo(string s) @safe { return 0; }
-    }
-
-    struct Bar {
-        string bar(double d) @safe { return ""; }
-        void bar(string s) @safe { }
-    }
-
-    struct UnsafeBar {
-        string bar(double d) @system { return ""; }
-        void bar(string s) @system { }
-    }
-
-    struct FooBar {
-        int foo(int i, string s) @safe { return 0; }
-        double lefoo(string s) @safe { return 0; }
-        string bar(double d) @safe { return ""; }
-        void bar(string s) @safe { }
-    }
-
-    class FooClass {
-        int foo(int i, string s) @safe { return 0; }
-        double lefoo(string s) @safe { return 0; }
-    }
-
-    class FooAbstractClass {
-        abstract int foo(int i, string s) @safe;
-        final double lefoo(string s) @safe { return 0; }
-    }
-
-    void useFoo(T)(T) if(implements!(T, IFoo)) {}
-    void useBar(T)(T) if(implements!(T, IBar)) {}
-    void useFooandBar(T)(T) if(implements!(T, IFoo) && implements!(T, IBar)) {}
+interface IFoo {
+    int foo(int i, string s) @safe;
+    double lefoo(string s) @safe;
 }
+
+interface IBar {
+    string bar(double d) @safe;
+    void bar(string s) @safe;
+}
+
+struct Foo {
+    int foo(int i, string s) @safe { return 0; }
+    double lefoo(string s) @safe { return 0; }
+}
+
+struct Bar {
+    string bar(double d) @safe { return ""; }
+    void bar(string s) @safe { }
+}
+
+struct UnsafeBar {
+    string bar(double d) @system { return ""; }
+    void bar(string s) @system { }
+}
+
+struct FooBar {
+    int foo(int i, string s) @safe { return 0; }
+    double lefoo(string s) @safe { return 0; }
+    string bar(double d) @safe { return ""; }
+    void bar(string s) @safe { }
+}
+
+class FooClass {
+    int foo(int i, string s) @safe { return 0; }
+    double lefoo(string s) @safe { return 0; }
+}
+
+class FooAbstractClass {
+    abstract int foo(int i, string s) @safe;
+    final double lefoo(string s) @safe { return 0; }
+}
+
+void useFoo(T)(T) if(implements!(T, IFoo)) {}
+void useBar(T)(T) if(implements!(T, IBar)) {}
+void useFooandBar(T)(T) if(implements!(T, IFoo) && implements!(T, IBar)) {}
