@@ -104,7 +104,7 @@ enum isOutputRange(R, E) = is(typeof(checkOutputRange!(R, E)));
     void myprint(in char[] s) { }
     static assert(isOutputRange!(typeof(&myprint), char));
 
-    static assert(!isOutputRange!(char[], char));
+    static assert( isOutputRange!(char[],  char));
     static assert( isOutputRange!(dchar[], wchar));
     static assert( isOutputRange!(dchar[], dchar));
 }
@@ -119,7 +119,7 @@ enum isOutputRange(R, E) = is(typeof(checkOutputRange!(R, E)));
     static assert( isOutputRange!(Appender!string, string));
     static assert( isOutputRange!(Appender!string*, string));
     static assert(!isOutputRange!(Appender!string, int));
-    static assert(!isOutputRange!(wchar[], wchar));
+    static assert( isOutputRange!(wchar[], wchar));
     static assert( isOutputRange!(dchar[], char));
     static assert( isOutputRange!(dchar[], string));
     static assert( isOutputRange!(dchar[], wstring));
