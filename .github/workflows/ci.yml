@@ -20,6 +20,6 @@ jobs:
           compiler: ${{ matrix.dc }}
 
       - name: Run tests
-        run: dub test
+        run: ./ci.sh
 
       - uses: codecov/codecov-action@v3.1.1

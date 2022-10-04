@@ -2,7 +2,7 @@ module concepts.implements;
 
 import std.traits : isAbstractClass, isAggregateType;
 
-alias Identity(alias T) = T;
+private alias Identity(alias T) = T;
 private enum isPrivate(T, string member) = !__traits(compiles, __traits(getMember, T, member));
 
 
@@ -103,10 +103,6 @@ template implements(alias T, alias Interface)
 
         return ret;
     }
-
-}
-
-unittest {
 
 }
 
