@@ -1,0 +1,7 @@
+name "concepts"
+authors "Atila Neves"
+description "Concepts for D"
+copyright "Copyright © 2016, Atila Neves"
+license "BSD"
+
+targetType "sourceLibrary"
