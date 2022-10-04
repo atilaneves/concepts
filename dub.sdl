@@ -5,3 +5,11 @@ copyright "Copyright © 2016, Atila Neves"
 license "BSD"
 
 targetType "sourceLibrary"
+
+configuration "default" {
+
+}
+
+configuration "unittest" {
+    dflags "-cov=ctfe"
+}
