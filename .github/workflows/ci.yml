@@ -6,9 +6,10 @@ jobs:
     name: Test
     strategy:
       matrix:
-        os: [ubuntu-20.04]
+        os: [ubuntu-20.04, windows-2019, macos-11]
         dc:
           - dmd-2.100.2
+          - ldc-1.30.0
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -20,6 +21,7 @@ jobs:
           compiler: ${{ matrix.dc }}
 
       - name: Run tests
+        shell: bash
         run: ./ci.sh
 
       - uses: codecov/codecov-action@v3.1.1
