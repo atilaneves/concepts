@@ -45,33 +45,9 @@ template models(alias T, alias P, A...)
     }
 }
 
-
 ///
-unittest
+@safe pure unittest
 {
-
-    enum isFoo(T) = is(typeof(checkFoo!T));
-
-
-    template isBar(T, U)
-    {
-        enum isBar = is(typeof(checkBar!(T, U)));
-    }
-
-    @models!(Foo, isFoo) //as a UDA
-    struct Foo
-    {
-        void foo() {}
-        static assert(models!(Foo, isFoo)); //as a static assert
-    }
-
-    @models!(Bar, isBar, byte) //as a UDA
-    struct Bar
-    {
-        byte bar;
-        static assert(models!(Bar, isBar, byte)); //as a static assert
-    }
-
     // can't assert that, e.g. !models!(Bar, isFoo) -
     // the whole point of `models` is that it doesn't compile
     // when the template constraint is not satisfied
@@ -80,9 +56,7 @@ unittest
 }
 
 
-@safe pure unittest
-{
-    struct Foo {}
+@safe pure unittest {
     enum weirdPred(T) = true;
     //always true, this is a sanity check
     static assert(weirdPred!Foo);
@@ -93,51 +67,69 @@ unittest
 
 @("@models can be applied to serialise")
 @safe pure unittest {
-    static assert(__traits(compiles, models!(serialise, isSerialisationFunction)));
+    static assert( __traits(compiles, models!(serialise,        isSerialisationFunction)));
     static assert(!__traits(compiles, models!(doesNotSerialise, isSerialisationFunction)));
 }
 
-// FIXME
-// @("@models can be applied to deserialise")
-// @safe pure unittest {
-//     static assert(__traits(compiles, models!(deserialise, isDeserialisationFunction)));
-// }
+@("@models can be applied to deserialise")
+@safe pure unittest {
+    static assert( __traits(compiles, models!(deserialise, isDeserialisationFunction)));
+    static assert(!__traits(compiles, models!(deserialise, isSerialisationFunction)));
+}
 
 
 version(unittest) {
-    void checkFoo(T)()
+
+    private enum isFoo(T) = is(typeof(checkFoo!T));
+    @models!(Foo, isFoo) //as a UDA
+    private struct Foo {
+        void foo() {}
+        static assert(models!(Foo, isFoo)); //as a static assert
+    }
+
+    private template isBar(T, U) {
+        enum isBar = is(typeof(checkBar!(T, U)));
+    }
+
+    @models!(Bar, isBar, byte) //as a UDA
+    private struct Bar {
+        byte bar;
+        static assert(models!(Bar, isBar, byte)); //as a static assert
+    }
+
+    private void checkFoo(T)()
     {
         T t = T.init;
         t.foo();
     }
 
-    void checkBar(T, U)()
+    private void checkBar(T, U)()
     {
         U _bar = T.init.bar;
     }
 
-    void checkSerialisationFunction(alias F)() {
+    private void checkSerialisationFunction(alias F)() {
         ubyte[] bytes = F(5);
     }
 
-    enum isSerialisationFunction(alias F) = is(typeof(checkSerialisationFunction!F));
+    private enum isSerialisationFunction(alias F) = is(typeof(checkSerialisationFunction!F));
 
     @models!(serialise, isSerialisationFunction)
-    ubyte[] serialise(T)(in T val) {
+    private ubyte[] serialise(T)(in T val) {
         return [42];
     }
 
-    void doesNotSerialise(T)(in T val) {
+    private void doesNotSerialise(T)(in T val) {
 
     }
 
-    void checkDeserialisationFunction(alias F)() {
+    private void checkDeserialisationFunction(alias F)() {
         ubyte[] bytes;
-        Request = F!int(bytes);
+        int res = F!int(bytes);
     }
-    void isDeserialisationFunction(alias F) = is(typeof(isDeserialisationFunction!F));
+    private enum isDeserialisationFunction(alias F) = is(typeof(checkDeserialisationFunction!F));
 
-    T deserialise(T)(in ubyte[] bytes) {
+    private T deserialise(T)(in ubyte[] bytes) {
         return T.init;
     }
 }

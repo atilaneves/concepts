@@ -106,14 +106,20 @@ template implements(alias T, alias Interface)
 
 }
 
+unittest {
+
+}
 
 @("Foo implements IFoo")
-@safe unittest {
+@safe pure unittest {
     static assert(__traits(compiles, implements!(Foo, IFoo)));
+    static assert(is(typeof({ implements!(Foo, IFoo); })));
+    static assert(!is(typeof({ implements!(Bar, IFoo); })));
     static assert(!__traits(compiles, implements!(Bar, IFoo)));
-    static assert(!__traits(compiles, implements!(Foo, IBar)));
-    static assert(__traits(compiles, implements!(Bar, IBar)));
-    static assert(!__traits(compiles, implements!(UnsafeBar, IBar)));
+    static assert(!is(typeof({ implements!(Foo, IBar); })));
+
+    static assert( is(typeof({ implements!(Bar,      IBar); })));
+    static assert(!is(typeof({ implements!(UnsafeBar, IBar); })));
 
     static assert(__traits(compiles, useFoo(Foo())));
     static assert(!__traits(compiles, useBar(Foo())));
@@ -122,7 +128,7 @@ template implements(alias T, alias Interface)
 }
 
 @("FooBar implements IFoo and IBar")
-@safe unittest {
+@safe pure unittest {
     static assert(__traits(compiles, implements!(FooBar, IFoo)));
     static assert(__traits(compiles, implements!(FooBar, IBar)));
 
@@ -133,60 +139,60 @@ template implements(alias T, alias Interface)
 }
 
 @("FooClass implements IFoo")
-@safe unittest {
+@safe pure unittest {
     static assert(__traits(compiles, implements!(FooClass, IFoo)));
     static assert(__traits(compiles, useFoo(FooClass.init)));
 }
 
 @("Foo implements FooAbstractClass")
-@safe unittest {
+@safe pure unittest {
     static assert(__traits(compiles, implements!(Foo, FooAbstractClass)));
 }
 
 version(unittest):
 
-interface IFoo {
+private interface IFoo {
     int foo(int i, string s) @safe;
     double lefoo(string s) @safe;
 }
 
-interface IBar {
+private interface IBar {
     string bar(double d) @safe;
     void bar(string s) @safe;
 }
 
-struct Foo {
+private struct Foo {
     int foo(int i, string s) @safe { return 0; }
     double lefoo(string s) @safe { return 0; }
 }
 
-struct Bar {
+private struct Bar {
     string bar(double d) @safe { return ""; }
     void bar(string s) @safe { }
 }
 
-struct UnsafeBar {
+private struct UnsafeBar {
     string bar(double d) @system { return ""; }
     void bar(string s) @system { }
 }
 
-struct FooBar {
+private struct FooBar {
     int foo(int i, string s) @safe { return 0; }
     double lefoo(string s) @safe { return 0; }
     string bar(double d) @safe { return ""; }
     void bar(string s) @safe { }
 }
 
-class FooClass {
+private class FooClass {
     int foo(int i, string s) @safe { return 0; }
     double lefoo(string s) @safe { return 0; }
 }
 
-class FooAbstractClass {
+private class FooAbstractClass {
     abstract int foo(int i, string s) @safe;
     final double lefoo(string s) @safe { return 0; }
 }
 
-void useFoo(T)(T) if(implements!(T, IFoo)) {}
-void useBar(T)(T) if(implements!(T, IBar)) {}
-void useFooandBar(T)(T) if(implements!(T, IFoo) && implements!(T, IBar)) {}
+private void useFoo(T)(T) if(implements!(T, IFoo)) {}
+private void useBar(T)(T) if(implements!(T, IBar)) {}
+private void useFooandBar(T)(T) if(implements!(T, IFoo) && implements!(T, IBar)) {}
