@@ -4,10 +4,14 @@ description "Concepts for D"
 copyright "Copyright © 2016, Atila Neves"
 license "BSD"
 
-targetType "sourceLibrary"
+targetType "library"
 
 configuration "default" {
 
+}
+
+configuration "sourceLibrary" {
+    targetType "sourceLibrary"
 }
 
 configuration "unittest" {
