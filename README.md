@@ -2,6 +2,7 @@ Concepts for D
 ===============
 
 [![Build Status](https://travis-ci.org/atilaneves/concepts.png?branch=master)](https://travis-ci.org/atilaneves/concepts)
+[![Coverage](https://codecov.io/gh/atilaneves/concepts/branch/master/graph/badge.svg)](https://codecov.io/gh/atilaneves/concepts)
 
 Template constraints in D are one the language's best
 features. However, when a constraint fails it can be hard to know
