@@ -6,10 +6,14 @@ jobs:
     name: Test
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2019, macos-11]
+        os:
+          - ubuntu-20.04
+          - windows-2019
+          - macos-11
         dc:
-          - dmd-2.101.2
+          - dmd-2.103.1
           - dmd-2.100.2
+          - ldc-1.32.2
           - ldc-1.30.0
 
     runs-on: ${{ matrix.os }}
@@ -25,4 +29,4 @@ jobs:
         shell: bash
         run: ./ci.sh
 
-      - uses: codecov/codecov-action@v3.1.1
+      - uses: codecov/codecov-action@v3.1.4
